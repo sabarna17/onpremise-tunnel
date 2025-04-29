@@ -1,0 +1,7 @@
+applications:
+  - name: swift-tunnel
+    random-route: false
+    path: ./
+    buidpack: https://github.com/cloudfoundry/nodejs-buidpack
+    host: swift-tunnel
+    memory: 512M
