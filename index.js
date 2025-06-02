@@ -30,12 +30,23 @@ const apiKeyValidator = (req, res, next) => {
     next(); // Proceed to the next middleware or route handler if the key is valid
   };
 
-const executeRequest = async (method, url, swift_system, body = null) => {
+const executeRequest = async (method, url, swift_system, body = null, heads = null) => {
     try {
-        let headers = {
-            "accept": "application/json",
-            "content-type": "application/json"
+        let headers;
+        if(heads){
+            headers = {
+                "accept": "application/json",
+                "content-type": "application/json",
+                "prog_variant": heads
+            }
         }
+        else{
+            headers = {
+                "accept": "application/json",
+                "content-type": "application/json"
+            }            
+        }
+
         const config = {
             method: method,
             url: url,
@@ -47,6 +58,28 @@ const executeRequest = async (method, url, swift_system, body = null) => {
         }
         console.log('Trying to retrive data: ', swift_system)
         if( swift_system === "SWIFTFDD") {
+            // if( method === 'post' ) {
+            //     const configpost = {
+            //         method: 'post',
+            //         url: url,
+            //         headers: {
+            //             'Accpet': 'application/json',
+            //             'Content-Type': 'application/json'
+            //         },
+            //         data: body,
+            //         xsrfHeaderName: "x-csrf-token"
+            //     };
+            //     const response = await axiosInstancefddPOST.request(configpost);
+            //     console.log(response.data);
+            //     return response.data;
+            // }
+            // else{
+            //     console.log(`I am here 4`);
+            //     console.log(config);
+            //     const response = await axiosInstancefdd.request(config);
+            //     console.log(JSON.stringify(response.data));
+            //     return response.data;
+            // }                        
             if( method === 'post' ) {
                 console.log(`I am here 1`);
                 console.log('Config: ', config);
@@ -111,7 +144,10 @@ app.get('*', apiKeyValidator, async (req, res) => {
         let swift_system = allHeaders
         swift_system = allHeaders["swift_system"];
         console.log(`Executing GET request for system: ${swift_system}`);
-        const response = await executeRequest('get', fullUrl, swift_system);
+        
+        let heads = allHeaders["prog_variant"];
+
+        const response = await executeRequest('get', fullUrl, swift_system, {}, heads = heads);
         res.json(response);
     } catch (error) {
         res.status(500).json({ error: 'Failed to process GET request' });
@@ -133,6 +169,7 @@ app.post('*', apiKeyValidator, async (req, res) => {
         }
         const allHeaders = req.headers;
         let swift_system = allHeaders
+        let heads = allHeaders;
         swift_system = allHeaders["swift_system"];
         console.log(`Executing POST request for system: ${swift_system}`);
 
